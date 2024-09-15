@@ -1,0 +1,40 @@
+[package]
+name = "frida_android"
+version = "0.1.2"
+edition = "2021"
+license = "Apache-2.0"
+authors = ["alterdekim"]
+keywords = ["tun", "network", "tunnel", "vpn"]
+categories = ["network-programming", "asynchronous"]
+readme = "README.md"
+
+[lib]
+crate-type = ["dylib"]
+
+[dependencies]
+clap = "2.33"
+aes-gcm = "0.10.3"
+tokio = { version = "1", features = ["full", "signal", "tracing"] }
+serde = "1.0"
+serde_derive = "1.0.190"
+rand = { version = "0.8.5", features = ["small_rng", "getrandom", "std_rng"] }
+block-modes = "0.8"
+block-padding = "0.2"
+generic-array = "0.14"
+socket2 = "0.4"
+env_logger = "0.9"
+log = "0.4.20"
+futures = "0.3.30"
+tun2 = { version = "2", features = ["async"] }
+packet = "0.1.4"
+crossbeam-channel = "0.5.13"
+hex = "0.4"
+serde_yaml = "0.9.34"
+x25519-dalek = { version = "2.0.1", features = ["getrandom", "static_secrets"] }
+base64 = "0.22.1"
+chrono = "0.4.38"
+console-subscriber = "0.4.0"
+network-interface = "2.0.0"
+
+[target.'cfg(target_os="android")'.dependencies]
+jni = { version = "0.21.1", default-features = false }
