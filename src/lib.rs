@@ -40,7 +40,8 @@ pub mod android {
 
         //output.into_inner()
 
-        let c_str = unsafe { CStr::from_ptr(env.get_string(java_pattern).expect("invalid pattern string").as_ptr()) };
+        let wo = env.get_string(java_pattern).expect("invalid pattern string").as_ptr();
+        let c_str = unsafe { CStr::from_ptr(wo) };
         let cfg_raw = match c_str.to_str() {
             Err(_) => "",
             Ok(string) => string,
