@@ -18,10 +18,12 @@ pub extern fn rust_greeting(to: *const c_char) -> *mut c_char {
 
 
 /// Expose the JNI interface for android below
-#[cfg(target_os="android")]
+//#[cfg(target_os="android")]
 #[allow(non_snake_case)]
 pub mod android {
     extern crate jni;
+
+    use config::ClientConfiguration;
 
     use super::*;
     use self::jni::JNIEnv;
@@ -31,11 +33,24 @@ pub mod android {
     #[no_mangle]
     pub unsafe extern fn Java_com_alterdekim_frida_FridaVPN_startClient(env: JNIEnv, _: JClass, java_pattern: JString) -> jstring {
         // Our Java companion code might pass-in "world" as a string, hence the name.
-        let world = rust_greeting(env.get_string(java_pattern).expect("invalid pattern string").as_ptr());
+        //let world = rust_greeting(env.get_string(java_pattern).expect("invalid pattern string").as_ptr());
         // Retake pointer so that we can use it below and allow memory to be freed when it goes out of scope.
-        let world_ptr = CString::from_raw(world);
-        let output = env.new_string(world_ptr.to_str().unwrap()).expect("Couldn't create java string!");
+        //let world_ptr = CString::from_raw(world);
+        //let output = env.new_string(world_ptr.to_str().unwrap()).expect("Couldn't create java string!");
 
+        //output.into_inner()
+
+        let c_str = unsafe { CStr::from_ptr(env.get_string(java_pattern).expect("invalid pattern string").as_ptr()) };
+        let cfg_raw = match c_str.to_str() {
+            Err(_) => "",
+            Ok(string) => string,
+        };
+
+        let config: ClientConfiguration = serde_yaml::from_str(cfg_raw).expect("Bad client config file structure");
+        client::client_mode(config);
+
+        let output = env.new_string("gabber").expect("Couldn't create java string!");
+        
         output.into_inner()
     }
 }

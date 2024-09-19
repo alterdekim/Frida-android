@@ -17,9 +17,8 @@ use crate::udp::{UDPVpnPacket, UDPVpnHandshake, UDPSerializable};
 use network_interface::NetworkInterface;
 use network_interface::NetworkInterfaceConfig;
 
-pub async fn client_mode(client_config: ClientConfiguration, s_interface: Option<&str>) {
+pub async fn client_mode(client_config: ClientConfiguration) {
     info!("Starting client...");
-    info!("s_interface: {:?}", s_interface);
 
     let sock = UdpSocket::bind("0.0.0.0:25565").await.unwrap();
     sock.connect(&client_config.server.endpoint).await.unwrap();
@@ -55,10 +54,6 @@ pub async fn client_mode(client_config: ClientConfiguration, s_interface: Option
             dx.send(buf[..n].to_vec()).unwrap();
         }
     });
-
-    let s_a: SocketAddr = client_config.server.endpoint.parse().unwrap();
-    #[cfg(target_os = "linux")]
-    configure_routes(&s_a.ip().to_string(), s_interface);
 
     let priv_key = BASE64_STANDARD.decode(client_config.client.private_key).unwrap();
     
