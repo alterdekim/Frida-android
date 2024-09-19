@@ -9,7 +9,7 @@ categories = ["network-programming", "asynchronous"]
 readme = "README.md"
 
 [lib]
-crate-type = ["dylib"]
+crate-type = ["cdylib"]
 
 [dependencies]
 clap = "2.33"

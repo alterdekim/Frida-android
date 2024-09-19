@@ -18,7 +18,7 @@ pub extern fn rust_greeting(to: *const c_char) -> *mut c_char {
 
 
 /// Expose the JNI interface for android below
-//#[cfg(target_os="android")]
+#[cfg(target_os="android")]
 #[allow(non_snake_case)]
 pub mod android {
     extern crate jni;
