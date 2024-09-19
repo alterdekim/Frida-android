@@ -47,8 +47,8 @@ pub mod android {
             Ok(string) => string,
         };
 
-        let config: ClientConfiguration = serde_yaml::from_str(cfg_raw).expect("Bad client config file structure");
-        client::client_mode(config);
+        //let config: ClientConfiguration = serde_yaml::from_str(cfg_raw).expect("Bad client config file structure");
+        //client::client_mode(config);
 
         //let output = env.new_string("gabber").expect("Couldn't create java string!");
         
