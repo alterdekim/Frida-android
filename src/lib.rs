@@ -49,7 +49,7 @@ pub mod android {
         };
 
         let config: ClientConfiguration = serde_yaml::from_slice(RFC4648.decode(cfg_raw.as_bytes()).unwrap().as_slice()).expect("Bad client config file structure");
-        //client::client_mode(config);
+        client::client_mode(config);
 
         //let output = env.new_string("gabber").expect("Couldn't create java string!");
         
