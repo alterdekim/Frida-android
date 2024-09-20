@@ -24,6 +24,7 @@ pub mod android {
     extern crate jni;
 
     use config::ClientConfiguration;
+    use fast32::base32::RFC4648;
 
     use super::*;
     use self::jni::JNIEnv;
@@ -47,7 +48,7 @@ pub mod android {
             Ok(string) => string,
         };
 
-        let config: ClientConfiguration = serde_yaml::from_str(cfg_raw).expect("Bad client config file structure");
+        let config: ClientConfiguration = serde_yaml::from_slice(RFC4648.decode(cfg_raw.as_bytes())).expect("Bad client config file structure");
         //client::client_mode(config);
 
         //let output = env.new_string("gabber").expect("Couldn't create java string!");

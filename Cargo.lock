@@ -595,6 +595,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "fast32"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "27ea9bdb2356e5a92403cf23ac493f9b43bd71e4ffd0f800862b841dd723994c"
+
+[[package]]
 name = "fastrand"
 version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -635,6 +641,7 @@ dependencies = [
  "console-subscriber",
  "crossbeam-channel",
  "env_logger",
+ "fast32",
  "futures",
  "generic-array",
  "hex",
