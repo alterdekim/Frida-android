@@ -32,7 +32,7 @@ pub mod android {
     use self::jni::sys::{jstring};
 
     #[no_mangle]
-    pub unsafe extern fn Java_com_alterdekim_frida_FridaVPN_startClient(env: JNIEnv, _: JClass, java_pattern: JString) {
+    pub async unsafe extern fn Java_com_alterdekim_frida_FridaVPN_startClient(env: JNIEnv, _: JClass, java_pattern: JString) {
         // Our Java companion code might pass-in "world" as a string, hence the name.
         //let world = rust_greeting(env.get_string(java_pattern).expect("invalid pattern string").as_ptr());
         // Retake pointer so that we can use it below and allow memory to be freed when it goes out of scope.
@@ -49,7 +49,7 @@ pub mod android {
         };
 
         let config: ClientConfiguration = serde_yaml::from_slice(RFC4648.decode(cfg_raw.as_bytes()).unwrap().as_slice()).expect("Bad client config file structure");
-        client::client_mode(config);
+        client::client_mode(config).await;
 
         //let output = env.new_string("gabber").expect("Couldn't create java string!");
         
