@@ -8,9 +8,6 @@ keywords = ["tun", "network", "tunnel", "vpn"]
 categories = ["network-programming", "asynchronous"]
 readme = "README.md"
 
-[lib]
-crate-type = ["cdylib"]
-
 [dependencies]
 clap = "2.33"
 aes-gcm = "0.10.3"
