@@ -7,6 +7,7 @@ use fast32::base32::RFC4648;
 
 mod config;
 mod client;
+mod udp;
 
 #[tokio::main]
 async fn main() {
