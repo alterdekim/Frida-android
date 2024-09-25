@@ -17,7 +17,7 @@ use crate::udp::{UDPVpnPacket, UDPVpnHandshake, UDPSerializable};
 use network_interface::NetworkInterface;
 use network_interface::NetworkInterfaceConfig;
 
-pub async fn client_mode(client_config: ClientConfiguration) {
+pub async fn client_mode(client_config: ClientConfiguration, fd: i32) {
     info!("Starting client...");
 
     let sock = UdpSocket::bind("0.0.0.0:25565").await.unwrap();
@@ -25,11 +25,7 @@ pub async fn client_mode(client_config: ClientConfiguration) {
 
     let mut config = tun2::Configuration::default();
     info!("address: {:?}", &client_config.client.address);
-    config.address(&client_config.client.address)
-        .netmask("255.255.255.255")
-        .destination("0.0.0.0")
-        .tun_name("tun0")
-        .up();
+    config.raw_fd(fd).up();
 
     let dev = tun2::create(&config).unwrap();
     let (mut dev_reader, mut dev_writer) = dev.split();

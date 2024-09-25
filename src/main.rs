@@ -26,11 +26,17 @@ async fn main() {
             .value_name("B32_RAW")
             .help("Configuration file data (base32 encoded)")
             .takes_value(true))
+        .arg(Arg::with_name("fd")
+            .long("fd")
+            .required(true)
+            .value_name("INT")
+            .help("File descriptor int")
+            .takes_value(true))
         .get_matches();
 
     let cfg_raw = matches.value_of("config").unwrap();
 
     let config: ClientConfiguration = serde_yaml::from_slice(RFC4648.decode(cfg_raw.as_bytes()).unwrap().as_slice()).expect("Bad client config file structure");
 
-    client::client_mode(config).await;
+    client::client_mode(config, matches.value_of("fd").unwrap().parse().unwrap()).await;
 }
