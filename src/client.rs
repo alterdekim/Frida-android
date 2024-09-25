@@ -24,9 +24,10 @@ pub async fn client_mode(client_config: ClientConfiguration) {
     sock.connect(&client_config.server.endpoint).await.unwrap();
 
     let mut config = tun2::Configuration::default();
+    info!("address: {:?}", &client_config.client.address);
     config.address(&client_config.client.address)
         .netmask("255.255.255.255")
-        .destination("10.66.66.1")
+        .destination("0.0.0.0")
         .tun_name("tun0")
         .up();
 
