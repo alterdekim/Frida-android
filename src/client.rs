@@ -40,7 +40,7 @@ pub async fn client_mode(client_config: ClientConfiguration, fd: i32) {
 
     tokio::spawn(async move {
         while let Ok(bytes) = rx.recv() {
-            info!("Write to tun {:?}", hex::encode(&bytes));
+            info!("Write to tun");
             dev_writer.write_all(&bytes).unwrap();
         }
     });
