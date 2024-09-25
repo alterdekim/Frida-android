@@ -38,14 +38,14 @@ pub async fn client_mode(client_config: ClientConfiguration, fd: i32) {
 
     let cipher_shared = Arc::new(Mutex::new(None));
 
-    tokio::spawn(async move {
+    let tun_writer_task = tokio::spawn(async move {
         while let Ok(bytes) = rx.recv() {
             info!("Write to tun");
             dev_writer.write_all(&bytes).unwrap();
         }
     });
 
-    tokio::spawn(async move {
+    let tun_reader_task = tokio::spawn(async move {
         let mut buf = vec![0; 8192];
         while let Ok(n) = dev_reader.read(&mut buf) {
             dx.send(buf[..n].to_vec()).unwrap();
@@ -55,7 +55,7 @@ pub async fn client_mode(client_config: ClientConfiguration, fd: i32) {
     let priv_key = BASE64_STANDARD.decode(client_config.client.private_key).unwrap();
     
     let cipher_shared_clone = cipher_shared.clone();
-    tokio::spawn(async move {
+    let socket_reader_task = tokio::spawn(async move {
         let mut buf = vec![0; 4096];
 
         loop {
@@ -101,36 +101,41 @@ pub async fn client_mode(client_config: ClientConfiguration, fd: i32) {
         }
     });
 
-    let pkey = BASE64_STANDARD.decode(client_config.client.public_key).unwrap();
-    let handshake = UDPVpnHandshake{ public_key: pkey, request_ip: client_config.client.address.parse::<Ipv4Addr>().unwrap() };
-    let mut nz = 0;
-    while nz < 25 {
-        sock_snd.send(&handshake.serialize()).await.unwrap();
-        nz += 1
-    }
-    //sock_snd.send(&handshake.serialize()).await.unwrap();
-
     let s_cipher = cipher_shared.clone();
-    loop {
-        if let Ok(bytes) = mx.recv() {
-            let s_c = s_cipher.lock().await;
-            
-            if s_c.is_some() {
-                let aes = Aes256Gcm::new(s_c.as_ref().unwrap().as_bytes().into());
-                let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
-                let ciphered_data = aes.encrypt(&nonce, &bytes[..]);
+
+    let socket_writer_task = tokio::spawn(async move {
+        let pkey = BASE64_STANDARD.decode(client_config.client.public_key).unwrap();
+        let handshake = UDPVpnHandshake{ public_key: pkey, request_ip: client_config.client.address.parse::<Ipv4Addr>().unwrap() };
+        let mut nz = 0;
+        while nz < 25 {
+            sock_snd.send(&handshake.serialize()).await.unwrap();
+            nz += 1
+        }
+        //sock_snd.send(&handshake.serialize()).await.unwrap();
+    
+        loop {
+            if let Ok(bytes) = mx.recv() {
+                let s_c = s_cipher.lock().await;
                 
-                if let Ok(ciphered_d) = ciphered_data {
-                    let vpn_packet = UDPVpnPacket{ data: ciphered_d, nonce: nonce.to_vec()};
-                    let serialized_data = vpn_packet.serialize();
-                    info!("Sent to socket");
-                    sock_snd.send(&serialized_data).await.unwrap();
+                if s_c.is_some() {
+                    let aes = Aes256Gcm::new(s_c.as_ref().unwrap().as_bytes().into());
+                    let nonce = Aes256Gcm::generate_nonce(&mut OsRng);
+                    let ciphered_data = aes.encrypt(&nonce, &bytes[..]);
+                    
+                    if let Ok(ciphered_d) = ciphered_data {
+                        let vpn_packet = UDPVpnPacket{ data: ciphered_d, nonce: nonce.to_vec()};
+                        let serialized_data = vpn_packet.serialize();
+                        info!("Sent to socket");
+                        sock_snd.send(&serialized_data).await.unwrap();
+                    } else {
+                        error!("Socket encryption failed.");
+                    }
                 } else {
-                    error!("Socket encryption failed.");
+                    warn!("There is no shared_secret in main loop");
                 }
-            } else {
-                warn!("There is no shared_secret in main loop");
             }
         }
-    }
+    });
+
+    tokio::join!(tun_writer_task, tun_reader_task, socket_writer_task, socket_reader_task);
 }
