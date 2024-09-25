@@ -40,7 +40,7 @@ pub async fn client_mode(client_config: ClientConfiguration, fd: i32) {
 
     tokio::spawn(async move {
         while let Ok(bytes) = rx.recv() {
-            //info!("Write to tun {:?}", hex::encode(&bytes));
+            info!("Write to tun {:?}", hex::encode(&bytes));
             dev_writer.write_all(&bytes).unwrap();
         }
     });
@@ -123,6 +123,7 @@ pub async fn client_mode(client_config: ClientConfiguration, fd: i32) {
                 if let Ok(ciphered_d) = ciphered_data {
                     let vpn_packet = UDPVpnPacket{ data: ciphered_d, nonce: nonce.to_vec()};
                     let serialized_data = vpn_packet.serialize();
+                    info!("Sent to socket");
                     sock_snd.send(&serialized_data).await.unwrap();
                 } else {
                     error!("Socket encryption failed.");
