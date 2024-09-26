@@ -48,6 +48,7 @@ pub async fn client_mode(client_config: ClientConfiguration, fd: i32) {
     let tun_reader_task = tokio::spawn(async move {
         let mut buf = vec![0; 8192];
         while let Ok(n) = dev_reader.read(&mut buf) {
+            info!("Read from tun");
             dx.send(buf[..n].to_vec()).unwrap();
         }
     });
