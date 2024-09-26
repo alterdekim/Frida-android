@@ -102,10 +102,10 @@ pub async fn client_mode(client_config: ClientConfiguration, fd: i32) {
     });
 
     let s_cipher = cipher_shared.clone();
+    let pkey = BASE64_STANDARD.decode(client_config.client.public_key).unwrap();
+    let handshake = UDPVpnHandshake{ public_key: pkey, request_ip: client_config.client.address.parse::<Ipv4Addr>().unwrap() };
 
     let socket_writer_task = tokio::spawn(async move {
-        let pkey = BASE64_STANDARD.decode(client_config.client.public_key).unwrap();
-        let handshake = UDPVpnHandshake{ public_key: pkey, request_ip: client_config.client.address.parse::<Ipv4Addr>().unwrap() };
         let mut nz = 0;
         while nz < 25 {
             sock_snd.send(&handshake.serialize()).await.unwrap();
